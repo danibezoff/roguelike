@@ -97,6 +97,7 @@ export default class Renderer {
     let tileW = this.tileset.tileWidth
     let tileH = this.tileset.tileHeight
     let childIndex = 0
+    let fgChanged = false
     this.smthChanged = false
 
     for (let x = 0; x < w; x++) {
@@ -110,24 +111,31 @@ export default class Renderer {
         }
 
         if (!cachedTile || !fgIsSame(tile, cachedTile)) {
-          if (!cachedTile || !charIsSame(tile, cachedTile)) {
-            let srcX = tile.col * tileW
-            let srcY = tile.row * tileH
-            let dstX = x * tileW
-            let dstY = y * tileH
-            let rectangle = new PIXI.Rectangle(srcX, srcY, tileW, tileH)
-            let frame = new PIXI.Texture(this.texture, rectangle)
-            let sprite = new PIXI.Sprite(frame)
-            sprite.position.set(dstX, dstY)
-            if (cachedTile) {
-              this.fgStage.getChildAt(childIndex).destroy()
-            }
-            this.fgStage.addChildAt(sprite, childIndex)
-          }
-          this.fgStage.getChildAt(childIndex).tint = toHex(tile.fg)
+          fgChanged = true
           this.smthChanged = true
         }
+
         childIndex++
+      }
+    }
+
+    if (fgChanged) {
+      this.fgStage.removeChildren()
+
+      for (let x = 0; x < w; x++) {
+        for (let y = 0; y < h; y++) {
+          let tile = visData[x][y]
+          let srcX = tile.col * tileW
+          let srcY = tile.row * tileH
+          let dstX = x * tileW
+          let dstY = y * tileH
+          let rectangle = new PIXI.Rectangle(srcX, srcY, tileW, tileH)
+          let frame = new PIXI.Texture(this.texture, rectangle)
+          let sprite = new PIXI.Sprite(frame)
+          sprite.position.set(dstX, dstY)
+          sprite.tint = toHex(tile.fg)
+          this.fgStage.addChild(sprite)
+        }
       }
     }
   }
@@ -181,10 +189,6 @@ function fgIsSame (tile1, tile2) {
 
 function bgIsSame (tile1, tile2) {
   return tile1.bg === tile2.bg
-}
-
-function charIsSame (tile1, tile2) {
-  return tile1.col === tile2.col && tile1.row === tile2.row
 }
 
 if (process.env.NODE_ENV === 'test') {
