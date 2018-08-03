@@ -13,6 +13,11 @@ export default {
         row: 0
       },
       beyondVisability: {
+        col: 3,
+        row: 2,
+        fg: 0x222222
+      },
+      air: {
         col: 0,
         row: 0
       }
@@ -59,8 +64,8 @@ export default {
 
     creature: {
       player: {
-        col: 4,
-        row: 0
+        col: 0,
+        row: 4
       }
     }
   }

@@ -1,31 +1,9 @@
-import {dimensionalArr} from 'utils'
+import genNewWorld from './gen-new-world'
 
 export default class World {
-  constructor (width, height) {
-    this.width = width
-    this.height = height
-    this.seaLevel = 10
-    this.peakLevel = 20
-    this._generateNewWorld()
-  }
-
-  _generateNewWorld () {
-    this.data = dimensionalArr(this.width, this.height, this.peakLevel)
-    fillLevel(this.data, 0, () => ({
-      block: {
-        id: 'bedrock'
-      }
-    }))
-    for (let i = 1; i < this.seaLevel; i++) {
-      fillLevel(this.data, i, () => ({
-        block: {
-          id: 'rock'
-        }
-      }))
-    }
-    for (let i = this.seaLevel; i < this.peakLevel; i++) {
-      fillLevel(this.data, i, () => ({}))
-    }
+  constructor () {
+    this.data = genNewWorld()
+    this.playerPos = { x: 50, y: 50, z: 2 }
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -58,10 +36,6 @@ export default class World {
 
   //   return revealed
   // }
-}
-
-function fillLevel (data, level, callback) {
-  for (let x of data) for (let y of x) y[level] = callback()
 }
 
 // function randInt (limit) {
@@ -117,7 +91,3 @@ function fillLevel (data, level, callback) {
 //
 //   return [x, y]
 // }
-
-if (process.env.NODE_ENV === 'test') {
-  module.exports.fillLevel = fillLevel
-}

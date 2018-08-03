@@ -18,10 +18,14 @@ export default class DataVisualizer {
     }
 
     tile = zTiles[zFocusIndex--]
-    if (tile !== undefined && 'block' in tile) {
+    if (tile === undefined) {
+      return this._compose(binds.special.beyondVisability)
+    }
+    if ('block' in tile) {
       return this._compose(binds.block[tile.block.id].fromAbove)
     }
-    return this._compose(binds.special.beyondVisability)
+
+    return this._compose(binds.special.air)
   }
 
   _compose (visData) {
