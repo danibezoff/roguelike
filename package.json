@@ -1,0 +1,57 @@
+{
+  "name": "roguelike",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --use_strict node_modules/.bin/jest --verbose",
+    "test:debug": "node --use_strict --inspect-brk node_modules/.bin/jest",
+    "start": "webpack-dev-server --env development",
+    "build": "webpack --env production",
+    "build:stats": "webpack --env production --json > stats.json",
+    "lint": "eslint --fix .",
+    "precommit": "eslint ."
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(jpe?g|png|gif|svg|eot|ttf|woff2?|(c|sa)ss)$": "<rootDir>/dummy-mock.js"
+    },
+    "modulePaths": [
+      "src",
+      "node_modules"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.54",
+    "@babel/preset-env": "^7.0.0-beta.54",
+    "autoprefixer": "^9.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.4.0",
+    "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^1.0.0",
+    "cssnano": "^4.0.3",
+    "eslint": "^5.1.0",
+    "file-loader": "^1.1.11",
+    "glob": "^7.1.2",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^0.14.3",
+    "jest": "^23.4.1",
+    "mini-css-extract-plugin": "^0.4.1",
+    "node-sass": "^4.9.2",
+    "postcss-loader": "^2.1.6",
+    "purify-css": "^1.2.5",
+    "purifycss-webpack": "^0.7.0",
+    "sass-loader": "^7.0.3",
+    "style-loader": "^0.21.0",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^3.0.8",
+    "webpack-dev-server": "^3.1.4",
+    "webpack-merge": "^4.1.3"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0-beta.54",
+    "pixi.js": "^4.8.1"
+  }
+}

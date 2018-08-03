@@ -1,0 +1,45 @@
+{
+  "tileWidth": 12,
+  "tileHeight": 12,
+  "cols": 16,
+  "rows": 16,
+  "defaultBgColor": "#030303",
+  "defaultFgColor": "#ffffff",
+  "bindings": {
+    "special": {
+      "unvisible": {
+        "col": 0,
+        "row": 0
+      },
+      "beyondVisability": {
+        "col": 0,
+        "row": 0,
+        "bg": "#444444"
+      }
+    },
+    "block": {
+      "bedrock": {
+        "col": 1,
+        "row": 11,
+        "fromAbove": {
+          "col": 9,
+          "row": 15
+        }
+      },
+      "rock": {
+        "col": 1,
+        "row": 11,
+        "fromAbove": {
+          "col": 9,
+          "row": 15
+        }
+      }
+    },
+    "creature": {
+      "player": {
+        "col": 4,
+        "row": 0
+      }
+    }
+  }
+}
