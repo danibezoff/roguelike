@@ -8,3 +8,7 @@ export function dimensionalArr (...dimensionSizes) {
   }
   return arr
 }
+
+export function hexToCss (hex) {
+  return '#' + ('00000' + hex.toString(16)).slice(-6)
+}

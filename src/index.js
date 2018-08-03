@@ -1,12 +1,13 @@
 import './style/style.sass'
-import tileset from './tilesets/default.json'
+import tileset from './tilesets/default'
 import image from './tilesets/default.png'
 import World from './world/World'
 import Renderer from './renderer/Renderer'
 import {ticker} from 'pixi.js'
+import {hexToCss} from 'utils'
 
 ;(async function () {
-  document.body.style['background-color'] = tileset.defaultBgColor
+  document.body.style['background-color'] = hexToCss(tileset.defaultBgColor)
 
   let renderer = new Renderer()
   let world = new World(30, 30)

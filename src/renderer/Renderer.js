@@ -106,7 +106,7 @@ export default class Renderer {
         let cachedTile = this.cachedVisData[x][y]
 
         if (!cachedTile || !bgIsSame(tile, cachedTile)) {
-          this.bgStage.getChildAt(childIndex).tint = toHex(tile.bg)
+          this.bgStage.getChildAt(childIndex).tint = tile.bg
           this.smthChanged = true
         }
 
@@ -133,7 +133,7 @@ export default class Renderer {
           let frame = new PIXI.Texture(this.texture, rectangle)
           let sprite = new PIXI.Sprite(frame)
           sprite.position.set(dstX, dstY)
-          sprite.tint = toHex(tile.fg)
+          sprite.tint = tile.fg
           this.fgStage.addChild(sprite)
         }
       }
@@ -170,10 +170,6 @@ function getDataScreenOffset (data, visData, cameraOffset) {
     x: floorDiv(visData.length - data.length, 2) - cameraOffset.x,
     y: floorDiv(visData[0].length - data[0].length, 2) - cameraOffset.y
   }
-}
-
-function toHex (str) {
-  return parseInt(str.slice(1), 16)
 }
 
 function getZTiles (data, x, y) {

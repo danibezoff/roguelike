@@ -1,4 +1,4 @@
-const utils = require('./utils.js')
+import * as utils from 'utils'
 
 describe('utils.js', () => {
   describe('dimensionalArr(...dimensionSizes)', () => {
@@ -27,4 +27,16 @@ describe('utils.js', () => {
       }
     })
   })
+
+  describe('hexToCss(hex)', () => {
+    const func = utils.hexToCss
+
+    it('converts hex number to valid css color', () => {
+      expect(func(0xFFFFFF)).toBe('#ffffff')
+      expect(func(0x00FFFF)).toBe('#00ffff')
+      expect(func(0x0000FF)).toBe('#0000ff')
+      expect(func(0x000001)).toBe('#000001')
+    })
+  })
+
 })
