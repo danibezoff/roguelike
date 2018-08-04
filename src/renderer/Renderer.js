@@ -3,6 +3,10 @@ import DataVisualizer from './DataVisualizer'
 import {dimensionalArr} from 'utils'
 
 export default class Renderer {
+  constructor () {
+    this.cameraOffset = { x: 0, y: 0, z: 0 }
+  }
+
   async init (tileset, image) {
     this.tileset = tileset
     this.texture = await getTextureFrom(image)
@@ -56,19 +60,19 @@ export default class Renderer {
     }
   }
 
-  render (data, cameraOffset) {
-    let visData = this._getVisData(data, cameraOffset)
+  render (data) {
+    let visData = this._getVisData(data)
     this._updateStages(visData)
     this.cachedVisData = visData
     if (this.smthChanged) this.renderer.render(this.mainStage)
   }
 
-  _getVisData (data, cameraOffset) {
+  _getVisData (data) {
     let w = this.canvasWInTiles
     let h = this.canvasHInTiles
     let visData = dimensionalArr(w, h)
-    let offset = getDataScreenOffset(data, visData, cameraOffset)
-    let zFocusIndex = floorDiv(data[0][0].length, 2) + cameraOffset.z
+    let offset = getDataScreenOffset(data, visData, this.cameraOffset)
+    let zFocusIndex = floorDiv(data[0][0].length, 2) + this.cameraOffset.z
     let visX = 0
     let visY = 0
     let dataX = -offset.x
