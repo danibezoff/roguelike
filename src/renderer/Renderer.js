@@ -1,5 +1,3 @@
-// FIXME: invert y axis
-
 import * as PIXI from 'pixi.js'
 import DataVisualizer from './DataVisualizer'
 import {dimensionalArr} from 'utils'
@@ -56,7 +54,9 @@ export default class Renderer {
         let sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
         sprite.width = tileW
         sprite.height = tileH
-        sprite.position.set(x * tileW, y * tileH)
+        let dstX = x * tileW
+        let dstY = this.renderer.height - (y + 1) * tileH
+        sprite.position.set(dstX, dstY)
         this.bgStage.addChild(sprite)
       }
     }
@@ -134,7 +134,7 @@ export default class Renderer {
           let srcX = tile.col * tileW
           let srcY = tile.row * tileH
           let dstX = x * tileW
-          let dstY = y * tileH
+          let dstY = this.renderer.height - (y + 1) * tileH
           let rectangle = new PIXI.Rectangle(srcX, srcY, tileW, tileH)
           let frame = new PIXI.Texture(this.texture, rectangle)
           let sprite = new PIXI.Sprite(frame)
