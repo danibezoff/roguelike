@@ -12,3 +12,9 @@ export function dimensionalArr (...dimensionSizes) {
 export function hexToCss (hex) {
   return '#' + ('00000' + hex.toString(16)).slice(-6)
 }
+
+export function saveIndexFromOverflow (index, length) {
+  while (index >= length) { index -= length }
+  while (index < 0) { index += length }
+  return index
+}

@@ -70,12 +70,6 @@ export default class World {
 //   return Math.floor(Math.random() * limit)
 // }
 
-// function saveIndexFromOwerflow (index, size) {
-//   while (index >= size) { index -= size }
-//   while (index < 0) { index += size }
-//   return index
-// }
-
 // function dirtOrGrass (data, x, y) {
 //   let dirtTilesAround = 0
 //   let grassTilesAround = 0

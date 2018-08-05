@@ -39,4 +39,19 @@ describe('utils.js', () => {
     })
   })
 
+  describe('saveIndexFromOverflow(index, length)', () => {
+    const func = utils.saveIndexFromOverflow
+
+    it('loops through valid indexes for specified length', function () {
+      let inputsOutputs = [
+        [0, 1, 0], [1, 1, 0], [5, 10, 5], [10, 10, 0], [11, 10, 1], [19, 10, 9],
+        [20, 10, 0], [22, 10, 2], [0, 100, 0], [100, 10, 0], [-1, 1, 0],
+        [-1, 2, 1], [-1, 10, 9], [-2, 10, 8], [-5, 10, 5], [-10, 10, 0],
+        [-11, 10, 9], [-21, 10, 9]
+      ]
+      for (let [index, size, result] of inputsOutputs) {
+        expect(func(index, size)).toBe(result)
+      }
+    })
+  })
 })
