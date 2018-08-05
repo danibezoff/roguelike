@@ -1,3 +1,5 @@
+// FIXME: invert y axis
+
 import * as PIXI from 'pixi.js'
 import DataVisualizer from './DataVisualizer'
 import {dimensionalArr} from 'utils'

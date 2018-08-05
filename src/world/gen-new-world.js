@@ -1,56 +1,39 @@
 import {dimensionalArr} from 'utils'
+import Tile from './Tile'
+import * as blocks from './tile-data/blocks'
+import * as creatures from './tile-data/creatures'
 
-export default function genNewWorld () {
-  const width = 100
-  const height = 100
+export default function genNewWorld (player) {
+  const width = 15
+  const height = 15
   const peakLevel = 4
 
   let world = dimensionalArr(width, height, peakLevel)
+  fillWithTiles(world)
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
-      world[x][y][0] = { block: { id: 'bedrock' } }
-
-      if (y < 75) {
-        world[x][y][1] = { block: { id: 'bedrock' } }
-      } else {
-        world[x][y][1] = {}
-      }
-
-      for (let i = 2; i < 5; i++) {
-        world[x][y][i] = {}
-      }
+      world[x][y][0].set(new blocks.Bedrock())
+      if (y > 3) world[x][y][1].set(new blocks.Bedrock())
     }
   }
 
-  world[50][50][2] = { creature: { id: 'player' } }
-
-  /*
-   *   O
-   */
-  world[48][50][2] = { block: { id: 'bedrock' } }
-
-  /*
-   *   O
-   *   O
-   */
-  world[48][46][2] = { block: { id: 'bedrock' } }
-  world[48][45][2] = { block: { id: 'bedrock' } }
-
-  /*
-   *   OO
-   *   O
-   */
-  world[48][41][2] = { block: { id: 'bedrock' } }
-  world[48][40][2] = { block: { id: 'bedrock' } }
-  world[49][40][2] = { block: { id: 'bedrock' } }
-
-  /*
-   *    O
-   *   O
-   */
-  world[48][36][2] = { block: { id: 'bedrock' } }
-  world[49][35][2] = { block: { id: 'bedrock' } }
+  world[7][7][2].set(player)
+  world[5][7][2].set(new blocks.Bedrock())
 
   return world
+}
+
+function fillWithTiles (world) {
+  let width = world.length
+  let height = world[0].length
+  let depth = world[0][0].length
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      for (let z = 0; z < depth; z++) {
+        world[x][y][z] = new Tile(world, x, y, z)
+      }
+    }
+  }
 }

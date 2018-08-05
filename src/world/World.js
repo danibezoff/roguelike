@@ -1,9 +1,11 @@
 import genNewWorld from './gen-new-world'
+import {Player} from './tile-data/creatures'
+import {dimensionalArr} from 'utils'
 
 export default class World {
   constructor () {
-    this.data = genNewWorld()
-    this.playerPos = { x: 50, y: 50, z: 2 }
+    this.player = new Player()
+    this.data = genNewWorld(this.player)
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -11,7 +13,33 @@ export default class World {
   }
 
   reveal () {
-    return this.data
+    let revealedArea = this.data // temporary full map
+    let clientData = this._expose(revealedArea)
+    return clientData
+  }
+
+  move (where) {
+    this.player.step(where)
+  }
+
+  // "exposing" should transform data to the format like the client sees:
+  // hide unseen behind obstacles, invisible creatures, other players' inventory
+  // for now it just hides unnecessary for client fields
+  _expose (data) {
+    let width = data.length
+    let height = data[0].length
+    let depth = data[0][0].length
+    let clientData = dimensionalArr(width, height, depth)
+
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        for (let z = 0; z < depth; z++) {
+          clientData[x][y][z] = data[x][y][z].exposeToClient()
+        }
+      }
+    }
+
+    return clientData
   }
 
   // reveal (x, y, radius) {

@@ -3,39 +3,134 @@ export default class GameHandler {
     this.renderer = renderer
     this.world = world
     this.keydownListener = this._handleKeydown.bind(this)
+    this.keyupListener = this._handleKeyup.bind(this)
   }
 
   handle () {
     window.addEventListener('keydown', this.keydownListener)
+    window.addEventListener('keyup', this.keyupListener)
   }
 
   unhandle () {
     window.removeEventListener('keydown', this.keydownListener)
+    window.removeEventListener('keyup', this.keyupListener)
   }
 
   _handleKeydown ({code}) {
-    let offset = this.renderer.cameraOffset
+    if (code === 'ShiftLeft' || code === 'ShiftRight') {
+      this.shift = true
+    }
 
-    if (code === 'Numpad7' || code === 'Numpad8' || code === 'Numpad9') {
-      offset.y--
+    if (this.shift) {
+      this._handleShifted(code)
+    } else {
+      this._handleUnshifted(code)
     }
-    if (code === 'Numpad1' || code === 'Numpad2' || code === 'Numpad3') {
-      offset.y++
+  }
+
+  _handleKeyup ({code}) {
+    if (code === 'ShiftLeft' || code === 'ShiftRight') {
+      this.shift = false
     }
-    if (code === 'Numpad1' || code === 'Numpad4' || code === 'Numpad7') {
-      offset.x--
-    }
-    if (code === 'Numpad3' || code === 'Numpad6' || code === 'Numpad9') {
-      offset.x++
-    }
+  }
+
+  _handleShifted (code) {
     if (code === 'NumpadAdd') {
-      offset.z++
+      this.renderer.cameraOffset.z++
+      return
     }
     if (code === 'NumpadSubtract') {
-      offset.z--
+      this.renderer.cameraOffset.z--
+      return
+    }
+    if (code === 'Comma') {
+      this.world.move({ x: 0, y: 0, z: 1 })
+      return
+    }
+    if (code === 'Period') {
+      this.world.move({ x: 0, y: 0, z: -1 })
+      return
+    }
+    if (code === 'Numpad1') {
+      this.renderer.cameraOffset.x--
+      this.renderer.cameraOffset.y--
+      return
+    }
+    if (code === 'Numpad2') {
+      this.renderer.cameraOffset.y--
+      return
+    }
+    if (code === 'Numpad3') {
+      this.renderer.cameraOffset.x++
+      this.renderer.cameraOffset.y--
+      return
+    }
+    if (code === 'Numpad4') {
+      this.renderer.cameraOffset.x--
+      return
     }
     if (code === 'Numpad5') {
+      let offset = this.renderer.cameraOffset
       offset.x = offset.y = offset.z = 0
+      return
+    }
+    if (code === 'Numpad6') {
+      this.renderer.cameraOffset.x++
+      return
+    }
+    if (code === 'Numpad7') {
+      this.renderer.cameraOffset.x--
+      this.renderer.cameraOffset.y++
+      return
+    }
+    if (code === 'Numpad8') {
+      this.renderer.cameraOffset.y++
+      return
+    }
+    if (code === 'Numpad9') {
+      this.renderer.cameraOffset.x++
+      this.renderer.cameraOffset.y++
+      return
+    }
+  }
+
+  _handleUnshifted (code) {
+    if (code === 'Numpad1') {
+      this.world.move({ x: -1, y: -1, z: 0 })
+      return
+    }
+    if (code === 'Numpad2') {
+      this.world.move({ x: 0, y: -1, z: 0 })
+      return
+    }
+    if (code === 'Numpad3') {
+      this.world.move({ x: 1, y: -1, z: 0 })
+      return
+    }
+    if (code === 'Numpad4') {
+      this.world.move({ x: -1, y: 0, z: 0 })
+      return
+    }
+    if (code === 'Numpad5') {
+      let offset = this.renderer.cameraOffset
+      offset.x = offset.y = offset.z = 0
+      return
+    }
+    if (code === 'Numpad6') {
+      this.world.move({ x: 1, y: 0, z: 0 })
+      return
+    }
+    if (code === 'Numpad7') {
+      this.world.move({ x: -1, y: 1, z: 0 })
+      return
+    }
+    if (code === 'Numpad8') {
+      this.world.move({ x: 0, y: 1, z: 0 })
+      return
+    }
+    if (code === 'Numpad9') {
+      this.world.move({ x: 1, y: 1, z: 0 })
+      return
     }
   }
 }
