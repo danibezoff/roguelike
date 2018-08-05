@@ -18,8 +18,8 @@ import GameHandler from 'input/GameHandler'
   await renderer.init(tileset, image)
   gameHandler.handle()
 
-  mainTicker.add(delta => {
-    world.step(delta)
+  mainTicker.add(() => {
+    world.step(mainTicker.elapsedMS)
     let data = world.reveal()
     renderer.render(data)
   })
