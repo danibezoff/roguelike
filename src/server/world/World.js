@@ -1,11 +1,11 @@
-import genNewWorld from './gen-new-world'
+import genNewWorldData from './gen-new-world-data'
 import {Player} from './tile-data/creatures'
 import {dimensionalArr} from 'utils'
 
 export default class World {
   constructor () {
     this.player = new Player()
-    this.data = genNewWorld(this.player)
+    this.data = genNewWorldData(this, this.player)
   }
 
   // eslint-disable-next-line no-unused-vars

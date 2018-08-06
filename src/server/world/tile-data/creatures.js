@@ -7,11 +7,11 @@ class Creature extends TileData {
 
   step (where) {
     let {x, y, z} = this.pos
-    this.world[x][y][z].remove(this)
+    this.world.data[x][y][z].remove(this)
     x += where.x
     y += where.y
     z += where.z
-    this.world[x][y][z].set(this)
+    this.world.data[x][y][z].set(this)
   }
 }
 
