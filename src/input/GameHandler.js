@@ -1,7 +1,7 @@
 export default class GameHandler {
-  constructor (renderer, world) {
+  constructor (renderer, server) {
     this.renderer = renderer
-    this.world = world
+    this.server = server
     this.keydownListener = this._handleKeydown.bind(this)
     this.keyupListener = this._handleKeyup.bind(this)
   }
@@ -44,11 +44,11 @@ export default class GameHandler {
       return
     }
     if (code === 'Comma') {
-      this.world.move({ x: 0, y: 0, z: 1 })
+      this.server.postMessage({ move: { x: 0, y: 0, z: 1 } })
       return
     }
     if (code === 'Period') {
-      this.world.move({ x: 0, y: 0, z: -1 })
+      this.server.postMessage({ move: { x: 0, y: 0, z: -1 } })
       return
     }
     if (code === 'Numpad1') {
@@ -96,19 +96,19 @@ export default class GameHandler {
 
   _handleUnshifted (code) {
     if (code === 'Numpad1') {
-      this.world.move({ x: -1, y: -1, z: 0 })
+      this.server.postMessage({ move: { x: -1, y: -1, z: 0 } })
       return
     }
     if (code === 'Numpad2') {
-      this.world.move({ x: 0, y: -1, z: 0 })
+      this.server.postMessage({ move: { x: 0, y: -1, z: 0 } })
       return
     }
     if (code === 'Numpad3') {
-      this.world.move({ x: 1, y: -1, z: 0 })
+      this.server.postMessage({ move: { x: 1, y: -1, z: 0 } })
       return
     }
     if (code === 'Numpad4') {
-      this.world.move({ x: -1, y: 0, z: 0 })
+      this.server.postMessage({ move: { x: -1, y: 0, z: 0 } })
       return
     }
     if (code === 'Numpad5') {
@@ -117,19 +117,19 @@ export default class GameHandler {
       return
     }
     if (code === 'Numpad6') {
-      this.world.move({ x: 1, y: 0, z: 0 })
+      this.server.postMessage({ move: { x: 1, y: 0, z: 0 } })
       return
     }
     if (code === 'Numpad7') {
-      this.world.move({ x: -1, y: 1, z: 0 })
+      this.server.postMessage({ move: { x: -1, y: 1, z: 0 } })
       return
     }
     if (code === 'Numpad8') {
-      this.world.move({ x: 0, y: 1, z: 0 })
+      this.server.postMessage({ move: { x: 0, y: 1, z: 0 } })
       return
     }
     if (code === 'Numpad9') {
-      this.world.move({ x: 1, y: 1, z: 0 })
+      this.server.postMessage({ move: { x: 1, y: 1, z: 0 } })
       return
     }
   }
