@@ -6,10 +6,16 @@ export default class World {
   constructor () {
     this.player = new Player()
     this.data = genNewWorldData(this, this.player)
+    this.worldAge = 0
   }
 
-  // eslint-disable-next-line no-unused-vars
   step (delta) {
+    this.worldAge += delta
+    this.lastStepTimestamp = performance.now()
+    let realBubble = this.data // TODO: get actual reality bubble
+    for (let x of realBubble) for (let y of x) for (let tile of y) {
+      tile.proceed()
+    }
   }
 
   reveal () {

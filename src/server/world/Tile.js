@@ -5,6 +5,12 @@ export default class Tile {
     this.data = {}
   }
 
+  proceed () {
+    for (let prop in this.data) {
+      this.data[prop].proceed()
+    }
+  }
+
   set (tileData) {
     if (this.data[tileData.category]) {
       throw new Error(
