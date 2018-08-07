@@ -54,4 +54,81 @@ describe('utils.js', () => {
       }
     })
   })
+
+  describe('getBubbleFromWorld(world, center, radius)', () => {
+    const func = utils.getBubbleFromWorld
+    let world, center, radius
+
+    beforeEach(() => {
+      radius = 10
+      center = { x: 1, y: 2, z: 3 }
+      world = {}
+      world.worldTileRatio = 4
+      world.data = utils.dimensionalArr(10, 10, 10)
+      for (let x of world.data) for (let y of x) {
+        for (let z = 0; z < y.length; z++) {
+          y[z] = {}
+        }
+      }
+    })
+
+    it('returns array with map data or `undefined`', () => {
+      let res = func(world, center, radius)
+      for (let x of res) for (let y of x) for (let tile of y) {
+        if (tile !== undefined) {
+          expect(typeof tile).toBe('object')
+        }
+      }
+    })
+
+    it('sets valid array size', () => {
+      let argsResults = [
+        [[world, center, 2], [5, 5, 1]],
+        [[world, center, 1.9], [3, 3, 1]],
+        [[world, center, 4], [9, 9, 3]],
+        [[world, center, 5.9], [11, 11, 3]],
+        [[world, center, 7.9], [15, 15, 3]]
+      ]
+
+      argsResults.forEach(([args, results]) => {
+        let res = func(...args)
+        expect(res.length).toBe(results[0])
+        expect(res[0].length).toBe(results[1])
+        expect(res[0][0].length).toBe(results[2])
+      })
+    })
+
+    it('keeps references to corresponding world tiles', () => {
+      radius = 0
+      center = { x: 4, y: 5, z: 6 }
+      let res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(world.data[4][5][6])
+
+      radius = 1
+      res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(world.data[3][4][6])
+
+      radius = 4
+      res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(world.data[0][1][5])
+    })
+
+    it('saves x and y from overflow', () => {
+      radius = 2
+      center = { x: 0, y: 1, z: 2 }
+      let res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(world.data[8][9][2])
+    })
+
+    it('does not save z from overflow', () => {
+      radius = 4
+      center = { x: 4, y: 4, z: 0 }
+      let res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(undefined)
+      expect(res[0][0][0]).not.toBe(world.data[0][0][9])
+    })
+
+    it.skip('does not keep references to tiles out of sphere', () => {
+    })
+  })
 })
