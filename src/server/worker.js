@@ -8,7 +8,7 @@ setInterval(() => {
   lastStep = now
 
   let worldData = world.reveal()
-  postMessage({ worldData })
+  self.postMessage({ worldData })
 }, 10)
 
 self.onmessage = function ({data}) {

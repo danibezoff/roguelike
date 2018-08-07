@@ -3,7 +3,7 @@ import TileData from './TileData'
 class Creature extends TileData {
   constructor (id) {
     super('creature', id)
-    this.stepDelay = 275
+    this.stepDelay = 325
   }
 
   step (where) {
@@ -23,5 +23,6 @@ class Creature extends TileData {
 export class Player extends Creature {
   constructor () {
     super('player')
+    this.maxVisionRadius = 4
   }
 }
