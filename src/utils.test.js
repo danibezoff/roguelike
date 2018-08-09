@@ -103,21 +103,14 @@ describe('utils.js', () => {
       center = { x: 4, y: 5, z: 6 }
       let res = func(world, center, radius)
       expect(res[0][0][0]).toBe(world.data[4][5][6])
-
-      radius = 1
-      res = func(world, center, radius)
-      expect(res[0][0][0]).toBe(world.data[3][4][6])
-
-      radius = 4
-      res = func(world, center, radius)
-      expect(res[0][0][0]).toBe(world.data[0][1][5])
     })
 
     it('saves x and y from overflow', () => {
-      radius = 2
-      center = { x: 0, y: 1, z: 2 }
+      radius = 1
+      center = { x: 0, y: 0, z: 0 }
       let res = func(world, center, radius)
-      expect(res[0][0][0]).toBe(world.data[8][9][2])
+      expect(res[0][1][0]).toBe(world.data[9][0][0])
+      expect(res[1][0][0]).toBe(world.data[0][9][0])
     })
 
     it('does not save z from overflow', () => {
@@ -128,7 +121,11 @@ describe('utils.js', () => {
       expect(res[0][0][0]).not.toBe(world.data[0][0][9])
     })
 
-    it.skip('does not keep references to tiles out of sphere', () => {
+    it('does not keep references to tiles out of sphere', () => {
+      radius = 1
+      center = { x: 0, y: 0, z: 0 }
+      let res = func(world, center, radius)
+      expect(res[0][0][0]).toBe(undefined)
     })
   })
 })

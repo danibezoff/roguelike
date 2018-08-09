@@ -19,7 +19,14 @@ export function saveIndexFromOverflow (index, length) {
   return index
 }
 
-// TODO: make spherical
+export function worldDistance (worldTileRatio, pos1, pos2) {
+  const sq = x => Math.pow(x, 2)
+  let xs = pos1.x - pos2.x
+  let ys = pos1.y - pos2.y
+  let zs = (pos1.z - pos2.z) * 4
+  return Math.sqrt(sq(xs) + sq(ys) + sq(zs))
+}
+
 export function getBubbleFromWorld (world, center, radius) {
   const worldTileRatio = world.worldTileRatio
   const worldData = world.data
@@ -60,6 +67,21 @@ export function getBubbleFromWorld (world, center, radius) {
     worldY = startWorldY
     x++
     worldX++
+  }
+
+  let bubbleCenter = {
+    x: Math.floor(width / 2),
+    y: Math.floor(height / 2),
+    z: Math.floor(depth / 2)
+  }
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      for (let z = 0; z < depth; z++) {
+        let distance = worldDistance(worldTileRatio, { x, y, z }, bubbleCenter)
+        if (distance > radius) bubble[x][y][z] = undefined
+      }
+    }
   }
 
   return bubble
