@@ -25,7 +25,7 @@ export default class World {
     let bubble = getBubbleFromWorld(
       this, this.player.pos, this.player.maxVisionRadius
     )
-    let clientData = this._exposeBubble(bubble)
+    let clientData = this._exposeToClient(bubble)
     return clientData
   }
 
@@ -35,8 +35,10 @@ export default class World {
 
   // "exposing" should transform data to the format like the client sees:
   // hide unseen behind obstacles, invisible creatures, other players' inventory
+  // it also exposes ceilings beneath visible tiles,
+  // so if player sees a creature, he aslo sees the floor it's standing on
   // for now it just hides unnecessary for client fields
-  _exposeBubble (bubble) {
+  _exposeToClient (bubble) {
     let width = bubble.length
     let height = bubble[0].length
     let depth = bubble[0][0].length

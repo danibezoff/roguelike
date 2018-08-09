@@ -21,11 +21,11 @@ export default class DataVisualizer {
     if (tile === undefined) {
       return this._compose(binds.special.beyondVisability)
     }
-    if ('block' in tile) {
-      return this._compose(binds.block[tile.block.id].fromAbove)
+    if ('ceiling' in tile) {
+      return this._compose(binds.ceiling[tile.ceiling.id])
     }
 
-    return this._compose(binds.special.air)
+    return this._compose(binds.special.beyondVisability)
   }
 
   _compose (visData) {

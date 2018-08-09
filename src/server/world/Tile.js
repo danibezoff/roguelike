@@ -2,17 +2,21 @@ export default class Tile {
   constructor (world, x, y, z) {
     this.world = world
     this.pos = { x, y, z }
-    this.data = {}
+    this._data = {}
   }
 
   proceed () {
-    for (let prop in this.data) {
-      this.data[prop].proceed()
+    for (let prop in this._data) {
+      this._data[prop].proceed()
     }
   }
 
+  get (category) {
+    return this._data[category]
+  }
+
   set (tileData) {
-    if (this.data[tileData.category]) {
+    if (this._data[tileData.category]) {
       throw new Error(
         `This tile already has ${tileData.category} TileData instance`
       )
@@ -20,19 +24,24 @@ export default class Tile {
 
     tileData.world = this.world
     tileData.pos = this.pos
-    this.data[tileData.category] = tileData
+    this._data[tileData.category] = tileData
   }
 
   remove (tileData) {
-    delete this.data[tileData.category]
+    delete this._data[tileData.category]
   }
 
-  exposeToClient () {
+  exposeToClient ({ onlyCeiling = false, noCeiling = false } = {}) {
     let exposed = {
       pos: this.pos
     }
-    for (let prop in this.data) {
-      exposed[prop] = this.data[prop].exposeToClient()
+
+    let all = !onlyCeiling && !noCeiling
+    for (let prop in this._data) {
+      let isCeiling = prop === 'ceiling'
+      if (all || (onlyCeiling && isCeiling) || (noCeiling && !isCeiling)) {
+        exposed[prop] = this._data[prop].exposeToClient()
+      }
     }
     return exposed
   }

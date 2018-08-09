@@ -1,6 +1,7 @@
 import {dimensionalArr} from 'utils'
 import Tile from './Tile'
 import * as blocks from './tile-data/blocks'
+import * as ceilings from './tile-data/ceilings'
 import * as creatures from './tile-data/creatures'
 
 export default function genNewWorldData (world, player) {
@@ -14,12 +15,17 @@ export default function genNewWorldData (world, player) {
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       worldData[x][y][0].set(new blocks.Bedrock())
-      if (y > 3) worldData[x][y][1].set(new blocks.Bedrock())
+      worldData[x][y][0].set(new ceilings.Bedrock())
+      if (y > 3) {
+        worldData[x][y][1].set(new blocks.Bedrock())
+        worldData[x][y][1].set(new ceilings.Bedrock())
+      }
     }
   }
 
   worldData[7][7][2].set(player)
   worldData[5][7][2].set(new blocks.Bedrock())
+  worldData[5][7][2].set(new ceilings.Bedrock())
 
   return worldData
 }
