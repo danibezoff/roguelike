@@ -13,7 +13,15 @@ module.exports = {
     node: true
   },
   rules: {
-    'no-console': 'off'
+    'no-console': 'off',
+    'semi': [
+      'error', 'never', { 'beforeStatementContinuationChars': 'always' }
+    ],
+    'semi-style': ['error', 'first'],
+    'no-trailing-spaces': 'error',
+    'space-before-function-paren': 'error',
+    'space-before-blocks': 'error',
+    'keyword-spacing': 'error'
   },
   root: true,
 
