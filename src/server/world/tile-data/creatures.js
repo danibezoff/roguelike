@@ -9,12 +9,13 @@ class Creature extends TileData {
   step (where) {
     if (this.scheduledAction) return
     this.scheduledAction = () => {
-      let {x, y, z} = this.pos
-      this.world.data[x][y][z].remove(this)
+      let {x, y, z} = this.tile.pos
+      let worldData = this.tile.world.data
+      worldData[x][y][z].remove(this)
       x += where.x
       y += where.y
       z += where.z
-      this.world.data[x][y][z].set(this)
+      worldData[x][y][z].set(this)
     }
     this._setScheduleTime(this.stepDelay)
   }
@@ -23,6 +24,6 @@ class Creature extends TileData {
 export class Player extends Creature {
   constructor () {
     super('player')
-    this.maxVisionRadius = 4
+    this.visionRadius = 20
   }
 }

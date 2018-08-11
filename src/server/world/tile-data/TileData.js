@@ -6,15 +6,15 @@ export default class TileData {
 
   proceed () {
     if (!this.scheduledAction) return
-    if (this.world.worldAge >= this.scheduledTime) {
+    if (this.tile.world.worldAge >= this.scheduledTime) {
       this.scheduledAction()
       this.scheduledAction = this.scheduledTime = undefined
     }
   }
 
   _setScheduleTime (delay) {
-    let delta = (performance.now() - this.world.lastStepTimestamp) / 2
-    this.scheduledTime = this.world.worldAge + delay + delta
+    let delta = (performance.now() - this.tile.world.lastStepTimestamp) / 2
+    this.scheduledTime = this.tile.world.worldAge + delay + delta
   }
 
   exposeToClient () {

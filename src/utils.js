@@ -56,7 +56,8 @@ export function getBubbleFromWorld (
     while (y < height) {
       let safeWorldY = saveIndexFromOverflow(worldY, worldH)
       while (z < depth) {
-        bubble[x][y][z] = worldData[safeWorldX][safeWorldY][worldZ]
+        let worldTile = worldData[safeWorldX][safeWorldY][worldZ]
+        bubble[x][y][z] = worldTile ? { worldData: worldTile } : undefined
         z++
         worldZ++
       }
@@ -145,7 +146,7 @@ export function withTilesInLine (pos1, pos2, callback) {
         [points[i].x, points[i].z] = [points[i].z, points[i].x]
       }
     }
-    callback(points)
+    if (callback(points) === 'terminate') return
 
     deltedX += deltaX
     deltedY += deltaY

@@ -22,16 +22,21 @@ export default class Tile {
       )
     }
 
-    tileData.world = this.world
-    tileData.pos = this.pos
+    tileData.tile = this
+    let hook = tileData.hookSet
+    if (hook) hook(this)
     this._data[tileData.category] = tileData
   }
 
   remove (tileData) {
     delete this._data[tileData.category]
+    let hook = tileData.hookRemove
+    if (hook) hook()
   }
 
-  exposeToClient ({ onlyCeiling = false, noCeiling = false } = {}) {
+  exposeToClient ({
+    withFloor = false, noCeiling = false, onlyCeiling = false
+  } = {}) {
     let exposed = {
       pos: this.pos
     }
@@ -42,6 +47,12 @@ export default class Tile {
       if (all || (onlyCeiling && isCeiling) || (noCeiling && !isCeiling)) {
         exposed[prop] = this._data[prop].exposeToClient()
       }
+    }
+    if (withFloor) {
+      let {x, y, z} = this.pos
+      let tileBelow = this.world.data[x][y][z - 1]
+      let ceiling = tileBelow && tileBelow.get('ceiling')
+      if (ceiling) exposed.floor = ceiling.exposeToClient()
     }
     return exposed
   }

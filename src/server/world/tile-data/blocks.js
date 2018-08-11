@@ -10,4 +10,12 @@ export class Bedrock extends Block {
   constructor () {
     super('bedrock')
   }
+
+  hookSet (tile) {
+    tile.opaque = true
+  }
+
+  hookRemove () {
+    this.tile.opaque = false
+  }
 }
