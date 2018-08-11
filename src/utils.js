@@ -27,7 +27,9 @@ export function worldDistance (worldTileRatio, pos1, pos2) {
   return Math.sqrt(sq(xs) + sq(ys) + sq(zs))
 }
 
-export function getBubbleFromWorld (world, center, radius) {
+export function getBubbleFromWorld (
+  world, center, radius, visionRadius = radius
+) {
   const worldTileRatio = world.worldTileRatio
   const worldData = world.data
 
@@ -79,10 +81,74 @@ export function getBubbleFromWorld (world, center, radius) {
     for (let y = 0; y < height; y++) {
       for (let z = 0; z < depth; z++) {
         let distance = worldDistance(worldTileRatio, { x, y, z }, bubbleCenter)
-        if (distance > radius) bubble[x][y][z] = undefined
+        if (distance > visionRadius) bubble[x][y][z] = undefined
       }
     }
   }
 
   return bubble
+}
+
+export function withTilesInLine (pos1, pos2, callback) {
+  let xDist = Math.abs(pos1.x - pos2.x)
+  let yDist = Math.abs(pos1.y - pos2.y)
+  let zDist = Math.abs(pos1.z - pos2.z)
+
+  let onAxisY, onAxisZ
+  let longest = Math.max(xDist, yDist, zDist)
+
+  if (xDist === longest) {
+    // empty
+  } else if (yDist === longest) {
+    onAxisY = true
+    ;[pos1.x, pos1.y] = [pos1.y, pos1.x]
+    ;[pos2.x, pos2.y] = [pos2.y, pos2.x]
+  } else if (zDist === longest) {
+    onAxisZ = true
+    ;[pos1.x, pos1.z] = [pos1.z, pos1.x]
+    ;[pos2.x, pos2.z] = [pos2.z, pos2.x]
+  }
+
+  let steps = Math.abs(pos2.x - pos1.x)
+
+  let deltaX = pos2.x > pos1.x ? 1 : -1
+  let deltaY = (pos2.y - pos1.y) / steps
+  let deltaZ = (pos2.z - pos1.z) / steps
+
+  let deltedX = pos1.x + 0.5
+  let deltedY = pos1.y + 0.5
+  let deltedZ = pos1.z + 0.5
+
+  for (let point = 0; point < steps + 1; point++) {
+    let points = []
+    let x = Math.floor(deltedX)
+    let y = Math.floor(deltedY)
+    let z = Math.floor(deltedZ)
+    points.push({ x, y, z })
+
+    if (y === deltedY) {
+      points.push({ x, y: y - 1, z })
+    }
+    if (z === deltedZ) {
+      points.push({ x, y, z: z - 1 })
+    }
+    if (points.length === 3) {
+      points.push({ x, y: y - 1, z: z - 1 })
+    }
+    if (onAxisY) {
+      for (let i = 0; i < points.length; i++) {
+        [points[i].x, points[i].y] = [points[i].y, points[i].x]
+      }
+    }
+    if (onAxisZ) {
+      for (let i = 0; i < points.length; i++) {
+        [points[i].x, points[i].z] = [points[i].z, points[i].x]
+      }
+    }
+    callback(points)
+
+    deltedX += deltaX
+    deltedY += deltaY
+    deltedZ += deltaZ
+  }
 }

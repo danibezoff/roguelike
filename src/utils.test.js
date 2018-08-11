@@ -128,4 +128,108 @@ describe('utils.js', () => {
       expect(res[0][0][0]).toBe(undefined)
     })
   })
+
+  describe('withTilesInLine(pos1, pos2, callback)', () => {
+    const func = utils.withTilesInLine
+    const testData = testData => {
+      testData.forEach(([funcArgs, mockArgs]) => {
+        let mockFunc = jest.fn()
+        func(funcArgs[0], funcArgs[1], mockFunc)
+        for (let i = 0; i < mockArgs.length; i++) {
+          expect(mockFunc.mock.calls[i]).toEqual([mockArgs[i]])
+        }
+      })
+    }
+
+    it('runs callback with coordinates of tile or tiles in line', () => {
+      testData([
+        [
+          [ { x: 0, y: 0, z: 0 }, { x: 2, y: 0, z: 0 } ],
+          [
+            [ { x: 0, y: 0, z: 0 } ],
+            [ { x: 1, y: 0, z: 0 } ],
+            [ { x: 2, y: 0, z: 0 } ]
+          ]
+        ],
+        [
+          [ { x: 0, y: 1, z: 0 }, { x: 2, y: 2, z: 0 } ],
+          [
+            [ { x: 0, y: 1, z: 0 } ],
+            [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
+            [ { x: 2, y: 2, z: 0 } ]
+          ]
+        ],
+        [
+          [ { x: 0, y: 0, z: 0 }, { x: 2, y: -1, z: -1 } ],
+          [
+            [ { x: 0, y: 0, z: 0 } ],
+            [
+              { x: 1, y: 0, z: 0 },
+              { x: 1, y: -1, z: 0 },
+              { x: 1, y: 0, z: -1 },
+              { x: 1, y: -1, z: -1 }
+            ],
+            [ { x: 2, y: -1, z: -1 } ]
+          ]
+        ]
+      ])
+    })
+
+    it('works with longest delta y', () => {
+      testData([
+        [
+          [ { y: 0, x: 0, z: 0 }, { y: 2, x: -1, z: -1 } ],
+          [
+            [ { y: 0, x: 0, z: 0 } ],
+            [
+              { y: 1, x: 0, z: 0 },
+              { y: 1, x: -1, z: 0 },
+              { y: 1, x: 0, z: -1 },
+              { y: 1, x: -1, z: -1 }
+            ],
+            [ { y: 2, x: -1, z: -1 } ]
+          ]
+        ]
+      ])
+    })
+
+    it('works with longest delta z', () => {
+      testData([
+        [
+          [ { z: 0, y: 0, x: 0 }, { z: 2, y: -1, x: -1 } ],
+          [
+            [ { z: 0, y: 0, x: 0 } ],
+            [
+              { z: 1, y: 0, x: 0 },
+              { z: 1, y: -1, x: 0 },
+              { z: 1, y: 0, x: -1 },
+              { z: 1, y: -1, x: -1 }
+            ],
+            [ { z: 2, y: -1, x: -1 } ]
+          ]
+        ]
+      ])
+    })
+
+    it('is symmetric', () => {
+      testData([
+        [
+          [ { x: 0, y: 1, z: 0 }, { x: 2, y: 2, z: 0 } ],
+          [
+            [ { x: 0, y: 1, z: 0 } ],
+            [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
+            [ { x: 2, y: 2, z: 0 } ]
+          ]
+        ],
+        [
+          [ { x: 2, y: 2, z: 0 }, { x: 0, y: 1, z: 0 } ],
+          [
+            [ { x: 2, y: 2, z: 0 } ],
+            [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
+            [ { x: 0, y: 1, z: 0 } ]
+          ]
+        ]
+      ])
+    })
+  })
 })
