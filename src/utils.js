@@ -90,7 +90,7 @@ export function getBubbleFromWorld (
   return bubble
 }
 
-export function withTilesInLine (pos1, pos2, callback) {
+export function withTilesInLine (pos1, pos2, callback, worldTileRatio) {
   let xDist = Math.abs(pos1.x - pos2.x)
   let yDist = Math.abs(pos1.y - pos2.y)
   let zDist = Math.abs(pos1.z - pos2.z)
@@ -119,6 +119,7 @@ export function withTilesInLine (pos1, pos2, callback) {
   let deltedX = pos1.x + 0.5
   let deltedY = pos1.y + 0.5
   let deltedZ = pos1.z + 0.5
+  let lastSinglePoint
 
   for (let point = 0; point < steps + 1; point++) {
     let points = []
@@ -136,6 +137,7 @@ export function withTilesInLine (pos1, pos2, callback) {
     if (points.length === 3) {
       points.push({ x, y: y - 1, z: z - 1 })
     }
+
     if (onAxisY) {
       for (let i = 0; i < points.length; i++) {
         [points[i].x, points[i].y] = [points[i].y, points[i].x]
@@ -146,6 +148,25 @@ export function withTilesInLine (pos1, pos2, callback) {
         [points[i].x, points[i].z] = [points[i].z, points[i].x]
       }
     }
+
+    if (points.length !== 1) {
+      points.sort((a, b) => {
+        let aDist = worldDistance(worldTileRatio, lastSinglePoint, a)
+        let bDist = worldDistance(worldTileRatio, lastSinglePoint, b)
+        let residual = aDist - bDist
+        if (residual === 0) { // we moving along z
+          if (deltaZ > 0) {
+            return a.x - b.x
+          } else {
+            return b.x - a.x
+          }
+        }
+        return residual
+      })
+    } else {
+      lastSinglePoint = points[0]
+    }
+
     if (callback(points) === 'terminate') return
 
     deltedX += deltaX

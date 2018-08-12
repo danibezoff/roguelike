@@ -133,14 +133,14 @@ describe('utils.js', () => {
     const testData = testData => {
       testData.forEach(([funcArgs, mockArgs]) => {
         let mockFunc = jest.fn()
-        func(funcArgs[0], funcArgs[1], mockFunc)
+        func(funcArgs[0], funcArgs[1], mockFunc, 4)
         for (let i = 0; i < mockArgs.length; i++) {
           expect(mockFunc.mock.calls[i]).toEqual([mockArgs[i]])
         }
       })
     }
 
-    it('runs callback with coordinates of tile or tiles in line', () => {
+    it('works with longest delta x', () => {
       testData([
         [
           [ { x: 0, y: 0, z: 0 }, { x: 2, y: 0, z: 0 } ],
@@ -148,27 +148,6 @@ describe('utils.js', () => {
             [ { x: 0, y: 0, z: 0 } ],
             [ { x: 1, y: 0, z: 0 } ],
             [ { x: 2, y: 0, z: 0 } ]
-          ]
-        ],
-        [
-          [ { x: 0, y: 1, z: 0 }, { x: 2, y: 2, z: 0 } ],
-          [
-            [ { x: 0, y: 1, z: 0 } ],
-            [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
-            [ { x: 2, y: 2, z: 0 } ]
-          ]
-        ],
-        [
-          [ { x: 0, y: 0, z: 0 }, { x: 2, y: -1, z: -1 } ],
-          [
-            [ { x: 0, y: 0, z: 0 } ],
-            [
-              { x: 1, y: 0, z: 0 },
-              { x: 1, y: -1, z: 0 },
-              { x: 1, y: 0, z: -1 },
-              { x: 1, y: -1, z: -1 }
-            ],
-            [ { x: 2, y: -1, z: -1 } ]
           ]
         ]
       ])
@@ -210,13 +189,30 @@ describe('utils.js', () => {
       ])
     })
 
-    it('is symmetric', () => {
+    it('is symmetric along axis and reversed', () => {
       testData([
+        [
+          [ { x: 0, y: 0, z: 0 }, { x: 2, y: 1, z: 0 } ],
+          [
+            [ { x: 0, y: 0, z: 0 } ],
+            [ { x: 1, y: 0, z: 0 }, { x: 1, y: 1, z: 0 } ],
+            [ { x: 2, y: 1, z: 0 } ]
+          ]
+        ],
+        [
+          [ { x: 0, y: 0, z: 0 }, { x: 2, y: -1, z: 0 } ],
+          [
+            [ { x: 0, y: 0, z: 0 } ],
+            [ { x: 1, y: 0, z: 0 }, { x: 1, y: -1, z: 0 } ],
+            [ { x: 2, y: -1, z: 0 } ]
+          ]
+        ],
+
         [
           [ { x: 0, y: 1, z: 0 }, { x: 2, y: 2, z: 0 } ],
           [
             [ { x: 0, y: 1, z: 0 } ],
-            [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
+            [ { x: 1, y: 1, z: 0 }, { x: 1, y: 2, z: 0 } ],
             [ { x: 2, y: 2, z: 0 } ]
           ]
         ],
@@ -226,6 +222,34 @@ describe('utils.js', () => {
             [ { x: 2, y: 2, z: 0 } ],
             [ { x: 1, y: 2, z: 0 }, { x: 1, y: 1, z: 0 } ],
             [ { x: 0, y: 1, z: 0 } ]
+          ]
+        ],
+
+        [
+          [ { z: 0, y: 0, x: 0 }, { z: 2, y: -1, x: -1 } ],
+          [
+            [ { z: 0, y: 0, x: 0 } ],
+            [
+              { z: 1, y: 0, x: 0 },
+              { z: 1, y: -1, x: 0 },
+              { z: 1, y: 0, x: -1 },
+              { z: 1, y: -1, x: -1 }
+            ],
+            [ { z: 2, y: -1, x: -1 } ]
+          ]
+        ],
+
+        [
+          [ { z: 2, y: -1, x: -1 }, { z: 0, y: 0, x: 0 } ],
+          [
+            [ { z: 2, y: -1, x: -1 } ],
+            [
+              { z: 1, y: -1, x: -1 },
+              { z: 1, y: 0, x: -1 },
+              { z: 1, y: -1, x: 0 },
+              { z: 1, y: 0, x: 0 }
+            ],
+            [ { z: 0, y: 0, x: 0 } ]
           ]
         ]
       ])
