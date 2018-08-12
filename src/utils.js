@@ -1,10 +1,11 @@
 export function dimensionalArr (...dimensionSizes) {
-  let [size, ...rest] = dimensionSizes
-  if (size === undefined) return undefined
+  return insertDim(dimensionSizes, [], 0)
+}
 
-  let arr = []
-  for (let i = 0; i < size; i++) {
-    arr[i] = dimensionalArr(...rest)
+function insertDim (dimensionSizes, arr, i) {
+  let last = dimensionSizes.length === i + 1
+  for (let j = 0; j < dimensionSizes[i]; j++) {
+    arr[j] = last ? undefined : insertDim(dimensionSizes, [], i + 1)
   }
   return arr
 }
