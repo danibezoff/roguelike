@@ -24,6 +24,6 @@ class Creature extends TileData {
 export class Player extends Creature {
   constructor () {
     super('player')
-    this.visionRadius = 20
+    this.visionRadius = 12
   }
 }

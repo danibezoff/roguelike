@@ -24,7 +24,6 @@ export default class World {
   }
 
   // TODO: add diagonal passible and not passible
-  // TODO: make ceiling not passible
   reveal () {
     let visionBubble = getBubbleFromWorld(
       this, this.player.tile.pos, this.player.visionRadius
@@ -43,24 +42,75 @@ export default class World {
     for (let x = 0; x < w; x++) {
       for (let y = 0; y < h; y++) {
         for (let z = 0; z < d; z++) {
-          withTilesInLine(center, { x, y, z }, points => {
-            let hasLineOfSight = false
+          if (!visionBubble[x][y][z]) continue
+
+          let lastPoint
+          let blockedParts = {}
+          let pos1 = { x: center.x, y: center.y, z: center.z }
+
+          withTilesInLine(pos1, { x, y, z }, points => {
             for (let i = 0; i < points.length; i++) {
-              let {x, y, z} = points[i]
-              let point = visionBubble[x][y][z]
-              if (point) {
-                point.visible = true
-                if (!point.worldData.opaque) hasLineOfSight = true
+              let point = points[i]
+              let visionTile = visionBubble[point.x][point.y][point.z]
+
+              if (visionTile) {
+                if (lastPoint && point.z !== lastPoint.z) {
+                  let terminate = this._shouldTerminateVerticalPassage(
+                    visionBubble, lastPoint, point
+                  )
+                  if (terminate) return 'terminate'
+                }
+
+                // if it's destination point
+                if (x === point.x && y === point.y && z === point.z) {
+                  visionTile.visible = true
+                } else {
+                  if (visionTile.worldData.opaque) {
+                    if (!(points.length in blockedParts)) {
+                      blockedParts[points.length] = []
+                    }
+                    blockedParts[points.length][i] = true
+                  }
+                }
+              } else {
+                return 'terminate'
               }
+
+              lastPoint = points[i]
             }
-            if (!hasLineOfSight) return 'terminate'
-          })
+
+            let terminate = false
+            outer:
+            for (let partsNum in blockedParts) {
+              for (let i = 0; i < partsNum; i++) {
+                if (blockedParts[partsNum][i] === undefined) {
+                  continue outer
+                }
+              }
+              terminate = true
+            }
+
+            if (terminate) return 'terminate'
+          }, this.worldTileRatio)
         }
       }
     }
 
     this._exposeToClient(visionBubble, w, h, d)
     return visionBubble
+  }
+
+  _shouldTerminateVerticalPassage (visionBubble, lastPoint, point) {
+    let {x, y, z} = point
+    let {x: lx, y: ly, z: lz} = lastPoint
+
+    if (z > lz) {
+      return visionBubble[x][y][z - 1].worldData.opaqueCeiling &&
+        visionBubble[lx][ly][lz].worldData.opaqueCeiling
+    } else {
+      return visionBubble[lx][ly][lz - 1].worldData.opaqueCeiling &&
+        visionBubble[x][y][z].worldData.opaqueCeiling
+    }
   }
 
   move (where) {

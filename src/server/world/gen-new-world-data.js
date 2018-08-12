@@ -7,7 +7,7 @@ import * as creatures from './tile-data/creatures'
 export default function genNewWorldData (world, player) {
   const width = 200
   const height = 200
-  const peakLevel = 4
+  const peakLevel = 9
 
   let worldData = dimensionalArr(width, height, peakLevel)
   fillWithTiles(world, worldData)
@@ -36,6 +36,8 @@ export default function genNewWorldData (world, player) {
   worldData[15][8][2].set(new ceilings.Bedrock())
   worldData[16][8][2].set(new blocks.Bedrock())
   worldData[16][8][2].set(new ceilings.Bedrock())
+
+  worldData[16][18][2].set(new ceilings.Bedrock())
 
   return worldData
 }

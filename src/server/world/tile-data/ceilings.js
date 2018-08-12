@@ -10,4 +10,12 @@ export class Bedrock extends Ceiling {
   constructor () {
     super('bedrock')
   }
+
+  hookSet (tile) {
+    tile.opaqueCeiling = true
+  }
+
+  hookRemove () {
+    this.tile.opaqueCeiling = false
+  }
 }

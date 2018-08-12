@@ -140,6 +140,15 @@ describe('utils.js', () => {
       })
     }
 
+    it('works with one tile', () => {
+      testData([
+        [
+          [ { x: 1, y: 2, z: 3 }, { x: 1, y: 2, z: 3 } ],
+          [ [ { x: 1, y: 2, z: 3 } ] ]
+        ]
+      ])
+    })
+
     it('works with longest delta x', () => {
       testData([
         [
