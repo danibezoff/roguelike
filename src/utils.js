@@ -28,9 +28,7 @@ export function worldDistance (worldTileRatio, pos1, pos2) {
   return Math.sqrt(sq(xs) + sq(ys) + sq(zs))
 }
 
-export function getBubbleFromWorld (
-  world, center, radius, visionRadius = radius
-) {
+export function getBubbleFromWorld (world, center, radius) {
   const worldTileRatio = world.worldTileRatio
   const worldData = world.data
 
@@ -52,6 +50,7 @@ export function getBubbleFromWorld (
   let x, y, z
   x = y = z = 0
 
+  // OPTIMIZE: this block seems to be > 5ms
   while (x < width) {
     let safeWorldX = saveIndexFromOverflow(worldX, worldW)
     while (y < height) {
@@ -73,23 +72,66 @@ export function getBubbleFromWorld (
     worldX++
   }
 
-  let bubbleCenter = {
-    x: Math.floor(width / 2),
-    y: Math.floor(height / 2),
-    z: Math.floor(depth / 2)
-  }
+  excludeTilesBeyondRadius(bubble, radius, worldTileRatio)
+  return bubble
+}
 
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      for (let z = 0; z < depth; z++) {
-        let distance = worldDistance(worldTileRatio, { x, y, z }, bubbleCenter)
-        if (distance > visionRadius) bubble[x][y][z] = undefined
+const excludeTilesBeyondRadius = (function () {
+  let cache = {}
+
+  function execute (bubble, radius, worldTileRatio) {
+    let cacheProp = `${radius}|${worldTileRatio}`
+    if (cacheProp in cache) {
+      let data = cache[cacheProp]
+
+      for (let x = 0; x < data.w; x++) {
+        for (let y = 0; y < data.h; y++) {
+          for (let z = 0; z < data.d; z++) {
+            let tile = data.tiles[x][y][z]
+            if (tile === undefined) {
+              bubble[x][y][z] = undefined
+            }
+          }
+        }
+      }
+    } else {
+      let width = bubble.length
+      let height = bubble[0].length
+      let depth = bubble[0][0].length
+
+      cache[cacheProp] = {
+        w: width,
+        h: height,
+        d: depth,
+        tiles: dimensionalArr(width, height, depth)
+      }
+
+      let bubbleCenter = {
+        x: Math.floor(width / 2),
+        y: Math.floor(height / 2),
+        z: Math.floor(depth / 2)
+      }
+
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          for (let z = 0; z < depth; z++) {
+            let distance = worldDistance(
+              worldTileRatio, { x, y, z }, bubbleCenter
+            )
+            if (distance > radius) {
+              cache[cacheProp].tiles[x][y][z] = undefined
+              bubble[x][y][z] = undefined
+            } else {
+              cache[cacheProp].tiles[x][y][z] = 1
+            }
+          }
+        }
       }
     }
   }
 
-  return bubble
-}
+  return execute
+}())
 
 export function withTilesInLine (pos1, pos2, callback, worldTileRatio) {
   let xDist = Math.abs(pos1.x - pos2.x)
