@@ -8,6 +8,7 @@ export default class World {
     this.worldBubbleRadius = 25
     this.player = new Player()
     this.data = genNewWorldData(this, this.player)
+    this.isDirtyForPlayer = true
     this.worldAge = 0
   }
 
@@ -25,6 +26,7 @@ export default class World {
 
   // TODO: add diagonal passible and not passible
   reveal () {
+    if (!this.isDirtyForPlayer) return
     let visionBubble = getBubbleFromWorld(
       this, this.player.tile.pos, this.player.visionRadius
     )
@@ -39,16 +41,35 @@ export default class World {
       z: Math.floor(d / 2)
     }
 
-    for (let x = 0; x < w; x++) {
-      for (let y = 0; y < h; y++) {
-        for (let z = 0; z < d; z++) {
-          if (!visionBubble[x][y][z]) continue
+    let x, y, z
+    let ww = w - 1
+    let hh = h - 1
+    let dd = d - 1
+
+    let xReversed = true
+    for (let xx = 0; xx < w; xx++) {
+      xReversed = !xReversed
+      x = xReversed ? ww - (xx - 1) / 2 : xx / 2
+
+      let yReversed = true
+      for (let yy = 0; yy < h; yy++) {
+        yReversed = !yReversed
+        y = yReversed ? hh - (yy - 1) / 2 : yy / 2
+
+        let zReversed = true
+        for (let zz = 0; zz < d; zz++) {
+          zReversed = !zReversed
+          z = zReversed ? dd - (zz - 1) / 2 : zz / 2
+
+          if (!visionBubble[x][y][z] || visionBubble[x][y][z].visible) {
+            continue
+          }
 
           let lastPoint
           let blockedParts = {}
           let pos1 = { x: center.x, y: center.y, z: center.z }
 
-          withTilesInLine(pos1, { x, y, z }, points => {
+          withTilesInLine(pos1, { x, y, z }, (points, centered) => {
             for (let i = 0; i < points.length; i++) {
               let point = points[i]
               let visionTile = visionBubble[point.x][point.y][point.z]
@@ -58,22 +79,22 @@ export default class World {
                   let terminate = this._shouldTerminateVerticalPassage(
                     visionBubble, lastPoint, point
                   )
-                  if (terminate) return 'terminate'
+                  if (terminate) return true
                 }
 
-                // if it's destination point
-                if (x === point.x && y === point.y && z === point.z) {
+                let destPoint = x === point.x && y === point.y && z === point.z
+                if (destPoint || (points.length === 1 && centered)) {
                   visionTile.visible = true
-                } else {
-                  if (visionTile.worldData.opaque) {
-                    if (!(points.length in blockedParts)) {
-                      blockedParts[points.length] = []
-                    }
-                    blockedParts[points.length][i] = true
+                }
+
+                if (visionTile.worldData.opaque) {
+                  if (!(points.length in blockedParts)) {
+                    blockedParts[points.length] = []
                   }
+                  blockedParts[points.length][i] = true
                 }
               } else {
-                return 'terminate'
+                return true
               }
 
               lastPoint = points[i]
@@ -90,13 +111,14 @@ export default class World {
               terminate = true
             }
 
-            if (terminate) return 'terminate'
+            if (terminate) return true
           }, this.worldTileRatio)
         }
       }
     }
 
     this._exposeToClient(visionBubble, w, h, d)
+    this.isDirtyForPlayer = false
     return visionBubble
   }
 

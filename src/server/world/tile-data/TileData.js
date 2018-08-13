@@ -9,6 +9,7 @@ export default class TileData {
     if (this.tile.world.worldAge >= this.scheduledTime) {
       this.scheduledAction()
       this.scheduledAction = this.scheduledTime = undefined
+      return true
     }
   }
 

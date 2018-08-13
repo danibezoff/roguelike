@@ -7,7 +7,9 @@ export default class Tile {
 
   proceed () {
     for (let prop in this._data) {
-      this._data[prop].proceed()
+      if (this._data[prop].proceed()) {
+        this.world.isDirtyForPlayer = true
+      }
     }
   }
 

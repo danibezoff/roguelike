@@ -210,7 +210,8 @@ export function withTilesInLine (pos1, pos2, callback, worldTileRatio) {
       lastSinglePoint = points[0]
     }
 
-    if (callback(points) === 'terminate') return
+    let centered = !(deltedX % 0.5) && !(deltedY % 0.5) && !(deltedZ % 0.5)
+    if (callback(points, centered)) return
 
     deltedX += deltaX
     deltedY += deltaY
