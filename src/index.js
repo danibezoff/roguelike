@@ -24,6 +24,6 @@ import Server from 'worker-loader!./server/worker'
   renderTicker.start()
 
   server.onmessage = ({data}) => {
-    if ('worldData' in data) worldData = data.worldData
+    if ('worldClientData' in data) worldData = data.worldClientData
   }
 }())

@@ -4,11 +4,12 @@ let world = new World()
 let lastStep = performance.now()
 setInterval(() => {
   let now = performance.now()
-  world.step(now - lastStep)
+  let worldClientData = world.step(now - lastStep)
   lastStep = now
 
-  let worldData = world.reveal()
-  self.postMessage({ worldData })
+  if (worldClientData) {
+    self.postMessage({ worldClientData })
+  }
 }, 10)
 
 self.onmessage = function ({data}) {

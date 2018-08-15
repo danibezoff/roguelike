@@ -36,17 +36,14 @@ export default class Tile {
     if (hook) hook()
   }
 
-  exposeToClient ({
-    withFloor = false, noCeiling = false, onlyCeiling = false
-  } = {}) {
+  exposeToClient ({ withFloor = false, noCeiling = false } = {}) {
     let exposed = {
       pos: this.pos
     }
 
-    let all = !onlyCeiling && !noCeiling
     for (let prop in this._data) {
       let isCeiling = prop === 'ceiling'
-      if (all || (onlyCeiling && isCeiling) || (noCeiling && !isCeiling)) {
+      if (!noCeiling || (noCeiling && !isCeiling)) {
         exposed[prop] = this._data[prop].exposeToClient()
       }
     }

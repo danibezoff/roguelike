@@ -11,6 +11,7 @@ export class Bedrock extends Block {
     super('bedrock')
   }
 
+  // TODO: push and pop from `opaque` array
   hookSet (tile) {
     tile.opaque = true
   }

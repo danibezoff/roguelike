@@ -16,6 +16,7 @@ class Creature extends TileData {
       y += where.y
       z += where.z
       worldData[x][y][z].set(this)
+      this.tile.world.playerHasMoved = true
     }
     this._setScheduleTime(this.stepDelay)
   }

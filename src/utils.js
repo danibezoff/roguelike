@@ -133,7 +133,11 @@ const excludeTilesBeyondRadius = (function () {
   return execute
 }())
 
-export function withTilesInLine (pos1, pos2, callback, worldTileRatio) {
+// FIXME: rounding error
+export function withTilesInLine (p1, p2, callback) {
+  let pos1 = { x: p1.x, y: p1.y, z: p1.z }
+  let pos2 = { x: p2.x, y: p2.y, z: p2.z }
+
   let xDist = Math.abs(pos1.x - pos2.x)
   let yDist = Math.abs(pos1.y - pos2.y)
   let zDist = Math.abs(pos1.z - pos2.z)
@@ -194,8 +198,9 @@ export function withTilesInLine (pos1, pos2, callback, worldTileRatio) {
 
     if (points.length !== 1) {
       points.sort((a, b) => {
-        let aDist = worldDistance(worldTileRatio, lastSinglePoint, a)
-        let bDist = worldDistance(worldTileRatio, lastSinglePoint, b)
+        let dummyTileRatio = 2
+        let aDist = worldDistance(dummyTileRatio, lastSinglePoint, a)
+        let bDist = worldDistance(dummyTileRatio, lastSinglePoint, b)
         let residual = aDist - bDist
         if (residual === 0) { // we moving along z
           if (deltaZ > 0) {
