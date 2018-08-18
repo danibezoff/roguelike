@@ -100,11 +100,60 @@ export default class RealityBubble {
 
   calculateFov () {
     let radius = this.player.visionRadius
+    if (radius + 1 > this.offsetXY) {
+      throw new Error('Vision radius has to be (bubble radius - 1) at maximum')
+    }
     this._iterateBubble(tile => tile.visible = false)
-    this._spiralInside(tile => {
-      if (tile.distFromCenter > radius || !tile.worldData) return
-      this._setVisibilityLineTo(tile)
-    })
+
+    let {x, y, z} = this.bubbleCenter
+    this.bubble[x][y][z].visible = true
+  }
+
+  _spiralOutwards (callback) {
+    let {x, y, z} = this.bubbleCenter
+    let tile
+
+    const zUpAndDown = () => {
+      do {
+        tile = this.bubble[x][y][++z]
+      } while (tile && !callback(tile))
+      z = this.bubbleCenter.z
+      do {
+        tile = this.bubble[x][y][--z]
+      } while (tile && !callback(tile))
+    }
+
+    const yUpAndDown = () => {
+      do {
+        zUpAndDown()
+        z = this.bubbleCenter.z
+        tile = this.bubble[x][++y][z]
+      } while (!callback(tile))
+
+      y = this.bubbleCenter.y - 1
+      tile = this.bubble[x][y][z]
+
+      while (!callback(tile)) {
+        zUpAndDown()
+        z = this.bubbleCenter.z
+        tile = this.bubble[x][--y][z]
+      }
+    }
+
+    do {
+      yUpAndDown()
+      y = this.bubbleCenter.y
+      tile = this.bubble[++x][y][z]
+    } while (!callback(tile))
+
+    x = this.bubbleCenter.x - 1
+    tile = this.bubble[x][y][z]
+
+    while (!callback(tile)) {
+      yUpAndDown()
+      y = this.bubbleCenter.y
+      tile = this.bubble[--x][y][z]
+    }
   }
 
   _spiralInside (callback) {
