@@ -24,7 +24,7 @@ export function worldDistance (worldTileRatio, pos1, pos2) {
   const sq = x => Math.pow(x, 2)
   let xs = pos1.x - pos2.x
   let ys = pos1.y - pos2.y
-  let zs = (pos1.z - pos2.z) * 4
+  let zs = (pos1.z - pos2.z) * worldTileRatio
   return Math.sqrt(sq(xs) + sq(ys) + sq(zs))
 }
 
