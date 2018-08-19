@@ -4,7 +4,7 @@ import {Player} from './tile-data/creatures'
 
 export default class World {
   constructor () {
-    this.tileRatio = 4
+    this.tileRatio = 3
     this.player = new Player()
     this.data = genNewWorldData(this, this.player)
     this.realityBubble = new RealityBubble(

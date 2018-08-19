@@ -1,6 +1,5 @@
-import {
-  worldDistance, dimensionalArr, saveIndexFromOverflow, withTilesInLine
-} from 'utils'
+import {worldDistance, dimensionalArr, saveIndexFromOverflow} from 'utils'
+import rbush from 'rbush'
 
 export default class RealityBubble {
   constructor (player, worldData, tileRatio) {
@@ -9,7 +8,7 @@ export default class RealityBubble {
     this.worldW = this.worldData.length
     this.worldH = this.worldData[0].length
     this.tileRatio = tileRatio
-    this._createBubble(15)
+    this._createBubble(25)
     this.fillWithWorldData()
   }
 
@@ -29,9 +28,17 @@ export default class RealityBubble {
             this.tileRatio, bubbleCenter, { x, y, z }
           )
           if (distFromCenter > radius) continue
+
+          let tilesFromCenter = worldDistance(1, bubbleCenter, { x, y, z })
           bubble[x][y][z] = {
             distFromCenter,
-            pos: { x, y, z }
+            tilesFromCenter,
+            pos: { x, y, z },
+            posRelToCenter: {
+              x: x - bubbleCenter.x,
+              y: y - bubbleCenter.y,
+              z: z - bubbleCenter.z
+            }
           }
         }
       }
@@ -107,6 +114,59 @@ export default class RealityBubble {
 
     let {x, y, z} = this.bubbleCenter
     this.bubble[x][y][z].visible = true
+    let tree = rbush(9)
+
+    this._spiralOutwards(tile => {
+      if (tile.distFromCenter < radius) {
+        this._manageTileFov(tile, tree)
+      } else {
+        return true
+      }
+    })
+  }
+
+  _manageTileFov (tile, tree) {
+    if (!tile.worldData) return
+
+    let {x, y, z} = tile.posRelToCenter
+    let centerPhi = Math.atan2(x, y)
+    let centerTheta = Math.acos(z / tile.tilesFromCenter)
+    let beyondVis = tree.collides({
+      minX: centerPhi, maxX: centerPhi, minY: centerTheta, maxY: centerTheta
+    })
+    if (!beyondVis) tile.visible = true
+    if (!tile.worldData.opaque) return
+
+    let PI = Math.PI
+    let EPS = Number.EPSILON
+    let halfSpotAngle = Math.atan(1 / (2 * tile.tilesFromCenter))
+    let minX, maxX, minY, maxY
+
+    if (Math.abs(Math.abs(centerPhi) - PI) < EPS) {
+      minX = -PI
+      maxX = -PI + halfSpotAngle
+      minY = centerTheta - halfSpotAngle
+      maxY = centerTheta + halfSpotAngle
+      tree.insert({ minX, maxX, minY, maxY })
+      minX = PI - halfSpotAngle
+      maxX = PI
+    } else if (centerTheta < EPS || Math.abs(centerTheta - PI) < EPS) {
+      minX = -PI
+      maxX = PI
+      if (centerTheta < EPS) {
+        minY = 0
+        maxY = halfSpotAngle
+      } else {
+        minY = PI - halfSpotAngle
+        maxY = PI
+      }
+    } else {
+      minX = centerPhi - halfSpotAngle
+      maxX = centerPhi + halfSpotAngle
+      minY = centerTheta - halfSpotAngle
+      maxY = centerTheta + halfSpotAngle
+    }
+    tree.insert({ minX, maxX, minY, maxY })
   }
 
   _spiralOutwards (callback) {
@@ -153,90 +213,6 @@ export default class RealityBubble {
       yUpAndDown()
       y = this.bubbleCenter.y
       tile = this.bubble[--x][y][z]
-    }
-  }
-
-  _spiralInside (callback) {
-    let maxWidthHeightIndex = this.widthHeight - 1
-    let maxDepthIndex = this.depth - 1
-
-    let x, y, z
-    let xReversed = true
-    for (let i = 0; i < this.widthHeight; i++) {
-      xReversed = !xReversed
-      x = xReversed ? maxWidthHeightIndex - (i - 1) / 2 : i / 2
-
-      let yReversed = true
-      for (let j = 0; j < this.widthHeight; j++) {
-        yReversed = !yReversed
-        y = yReversed ? maxWidthHeightIndex - (j - 1) / 2 : j / 2
-
-        let zReversed = true
-        for (let k = 0; k < this.depth; k++) {
-          zReversed = !zReversed
-          z = zReversed ? maxDepthIndex - (k - 1) / 2 : k / 2
-
-          let tile = this.bubble[x][y][z]
-          if (tile) callback(tile)
-        }
-      }
-    }
-  }
-
-  _setVisibilityLineTo (tile) {
-    let lastPoint
-    let blockedParts = {}
-
-    withTilesInLine(this.bubbleCenter, tile.pos, (points, centered) => {
-      for (let i = 0; i < points.length; i++) {
-        let point = points[i]
-        let tileUnderLine = this.bubble[point.x][point.y][point.z]
-
-        if (lastPoint && point.z !== lastPoint.z) {
-          let terminate = this._shouldTerminateVerticalPassage(point, lastPoint)
-          if (terminate) return true
-        }
-
-        let destPoint = tile.pos.x === point.x && tile.pos.y === point.y &&
-          tile.pos.z === point.z
-        if (destPoint || (points.length === 1 && centered)) {
-          tileUnderLine.visible = true
-        }
-
-        if (tileUnderLine.worldData.opaque) {
-          if (!(points.length in blockedParts)) {
-            blockedParts[points.length] = []
-          }
-          blockedParts[points.length][i] = true
-        }
-
-        lastPoint = point
-      }
-
-      let terminate = false
-      outer:
-      for (let partsNum in blockedParts) {
-        for (let i = 0; i < partsNum; i++) {
-          if (blockedParts[partsNum][i] === undefined) {
-            continue outer
-          }
-        }
-        terminate = true
-      }
-      if (terminate) return true
-    })
-  }
-
-  _shouldTerminateVerticalPassage (point, lastPoint) {
-    let {x, y, z} = point
-    let {x: lx, y: ly, z: lz} = lastPoint
-
-    if (z > lz) {
-      return this.bubble[x][y][z - 1].worldData.opaqueCeiling &&
-        this.bubble[lx][ly][lz].worldData.opaqueCeiling
-    } else {
-      return this.bubble[lx][ly][lz - 1].worldData.opaqueCeiling &&
-        this.bubble[x][y][z].worldData.opaqueCeiling
     }
   }
 
