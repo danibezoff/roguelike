@@ -221,17 +221,9 @@ export default class RealityBubble {
       this.widthHeight, this.widthHeight, this.depth
     )
     this._iterateBubble(tile => {
-      if (!tile.visible) return
+      if (!tile.visible && !tile.onlyBlockVisible) return
       let {x, y, z} = tile.pos
-      let tileBeneath = this.bubble[x][y][z - 1]
-      let tileAbove = this.bubble[x][y][z + 1]
-      let opaque = tile.worldData.opaque
-      let withFloor = (!tileBeneath || !tileBeneath.visible) && !opaque
-      let noCeiling = (!tileAbove || !tileAbove.visible) && opaque
-      clientData[x][y][z] = tile.worldData.exposeToClient({
-        withFloor: withFloor,
-        noCeiling: noCeiling
-      })
+      clientData[x][y][z] = tile.worldData.exposeToClient(tile.onlyBlockVisible)
     })
     return clientData
   }

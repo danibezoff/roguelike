@@ -25,33 +25,27 @@ export default class Tile {
     }
 
     tileData.tile = this
-    let hook = tileData.hookSet
-    if (hook) hook(this)
+    tileData.hookSet(this)
     this._data[tileData.category] = tileData
   }
 
   remove (tileData) {
     delete this._data[tileData.category]
-    let hook = tileData.hookRemove
-    if (hook) hook()
+    tileData.hookRemove()
   }
 
-  exposeToClient ({ withFloor = false, noCeiling = false } = {}) {
+  exposeToClient (onlyBlock) {
     let exposed = {
       pos: this.pos
     }
-
-    for (let prop in this._data) {
-      let isCeiling = prop === 'ceiling'
-      if (!noCeiling || (noCeiling && !isCeiling)) {
+    if (onlyBlock) {
+      if ('block' in this._data) {
+        exposed.block = this._data.block.exposeToClient()
+      }
+    } else {
+      for (let prop in this._data) {
         exposed[prop] = this._data[prop].exposeToClient()
       }
-    }
-    if (withFloor) {
-      let {x, y, z} = this.pos
-      let tileBelow = this.world.data[x][y][z - 1]
-      let ceiling = tileBelow && tileBelow.get('ceiling')
-      if (ceiling) exposed.floor = ceiling.exposeToClient()
     }
     return exposed
   }

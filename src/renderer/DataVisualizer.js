@@ -16,16 +16,13 @@ export default class DataVisualizer {
     if ('creature' in tile) {
       return this._compose(binds.creature[tile.creature.id])
     }
-    if ('floor' in tile) {
-      return this._compose(binds.ceiling[tile.floor.id])
-    }
 
     tile = zTiles[zFocusIndex--]
     if (tile === undefined) {
       return this._compose(binds.special.beyondVisability)
     }
-    if ('ceiling' in tile) {
-      return this._compose(binds.ceiling[tile.ceiling.id])
+    if ('block' in tile) {
+      return this._compose(binds.block[tile.block.id].fromAbove)
     }
 
     return this._compose(binds.special.beyondVisability)

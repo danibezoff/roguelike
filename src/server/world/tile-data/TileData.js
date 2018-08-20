@@ -18,6 +18,9 @@ export default class TileData {
     this.scheduledTime = this.tile.world.worldAge + delay + delta
   }
 
+  hookSet () {}
+  hookRemove () {}
+
   exposeToClient () {
     return { id: this.id }
   }

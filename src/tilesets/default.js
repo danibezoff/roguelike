@@ -14,18 +14,15 @@ export default {
       }
     },
 
-    ceiling: {
-      bedrock: {
-        col: 9,
-        row: 15
-      }
-    },
-
     block: {
       bedrock: {
         col: 11,
-        row: 13
-      }
+        row: 13,
+        fromAbove: {
+          col: 9,
+          row: 15
+        }
+      },
     },
 
     creature: {
