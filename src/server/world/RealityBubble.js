@@ -1,6 +1,35 @@
 import {worldDistance, dimensionalArr, saveIndexFromOverflow} from 'utils'
 import rbush from 'rbush'
 
+const octantThirdTransforms = [
+  { xx:  1, xy:  0, xz:  0, yy:  1, yx:  0, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx: -1, xy:  0, xz:  0, yy:  1, yx:  0, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx:  1, xy:  0, xz:  0, yy: -1, yx:  0, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx: -1, xy:  0, xz:  0, yy: -1, yx:  0, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx:  0, xy:  1, xz:  0, yy:  0, yx:  1, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx:  0, xy: -1, xz:  0, yy:  0, yx:  1, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx:  0, xy:  1, xz:  0, yy:  0, yx: -1, yz:  0, zz:  1, zx:  0, zy:  0 },
+  { xx:  0, xy: -1, xz:  0, yy:  0, yx: -1, yz:  0, zz:  1, zx:  0, zy:  0 },
+
+  { xx:  1, xy:  0, xz:  0, yy:  1, yx:  0, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx: -1, xy:  0, xz:  0, yy:  1, yx:  0, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx:  1, xy:  0, xz:  0, yy: -1, yx:  0, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx: -1, xy:  0, xz:  0, yy: -1, yx:  0, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx:  0, xy:  1, xz:  0, yy:  0, yx:  1, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx:  0, xy: -1, xz:  0, yy:  0, yx:  1, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx:  0, xy:  1, xz:  0, yy:  0, yx: -1, yz:  0, zz: -1, zx:  0, zy:  0 },
+  { xx:  0, xy: -1, xz:  0, yy:  0, yx: -1, yz:  0, zz: -1, zx:  0, zy:  0 },
+
+  { xx:  1, xy:  0, xz:  0, yy:  0, yx:  0, yz: -1, zz:  0, zx:  0, zy:  1 },
+  { xx: -1, xy:  0, xz:  0, yy:  0, yx:  0, yz: -1, zz:  0, zx:  0, zy:  1 },
+  { xx:  1, xy:  0, xz:  0, yy:  0, yx:  0, yz: -1, zz:  0, zx:  0, zy: -1 },
+  { xx: -1, xy:  0, xz:  0, yy:  0, yx:  0, yz: -1, zz:  0, zx:  0, zy: -1 },
+  { xx:  1, xy:  0, xz:  0, yy:  0, yx:  0, yz:  1, zz:  0, zx:  0, zy:  1 },
+  { xx: -1, xy:  0, xz:  0, yy:  0, yx:  0, yz:  1, zz:  0, zx:  0, zy:  1 },
+  { xx:  1, xy:  0, xz:  0, yy:  0, yx:  0, yz:  1, zz:  0, zx:  0, zy: -1 },
+  { xx: -1, xy:  0, xz:  0, yy:  0, yx:  0, yz:  1, zz:  0, zx:  0, zy: -1 },
+]
+
 export default class RealityBubble {
   constructor (player, worldData, tileRatio) {
     this.player = player
@@ -9,6 +38,7 @@ export default class RealityBubble {
     this.worldH = this.worldData[0].length
     this.tileRatio = tileRatio
     this._createBubble(25)
+    this._createOctantThird()
     this.fillWithWorldData()
   }
 
@@ -33,12 +63,7 @@ export default class RealityBubble {
           bubble[x][y][z] = {
             distFromCenter,
             tilesFromCenter,
-            pos: { x, y, z },
-            posRelToCenter: {
-              x: x - bubbleCenter.x,
-              y: y - bubbleCenter.y,
-              z: z - bubbleCenter.z
-            }
+            pos: { x, y, z }
           }
         }
       }
@@ -50,6 +75,36 @@ export default class RealityBubble {
     this.depth = depth
     this.bubbleCenter = bubbleCenter
     this.bubble = bubble
+  }
+
+  _createOctantThird () {
+    let size = this.offsetXY
+    let octantThird = dimensionalArr(size, size, size)
+    let center = { x: 0, y: 0, z: 0 }
+    const tilesDist = point => worldDistance(1, center, point)
+
+    for (let y = 1; y < size; y++) {
+      for (let x = 0; x <= y; x++) {
+        for (let z = 0; z <= y; z++) {
+          let tile = {}
+          octantThird[x][y][z] = tile
+
+          tile.centerPhi = getPhi(x, y)
+          let tilesToCenter = tilesDist({ x, y, z })
+          tile.centerTheta = getTheta(z, tilesToCenter)
+
+          tile.leftPhi = getPhi(x - 0.5, y)
+          tile.rightPhi = getPhi(x + 0.5, y)
+
+          let tilesToBottom = tilesDist({ x, y, z: z - 0.5 })
+          tile.bottomTheta = getTheta(z - 0.5, tilesToBottom)
+          let tilesToTop = tilesDist({ x, y, z: z + 0.5 })
+          tile.topTheta = getTheta(z + 0.5, tilesToTop)
+        }
+      }
+    }
+
+    this.octantThird = octantThird
   }
 
   fillWithWorldData () {
@@ -110,109 +165,75 @@ export default class RealityBubble {
     if (radius + 1 > this.offsetXY) {
       throw new Error('Vision radius has to be (bubble radius - 1) at maximum')
     }
-    this._iterateBubble(tile => tile.visible = false)
-
+    this._iterateBubble(tile => {
+      tile.visible = false
+      tile.onlyBlockVis = false
+    })
     let {x, y, z} = this.bubbleCenter
     this.bubble[x][y][z].visible = true
+
+    for (let i = 0; i < octantThirdTransforms.length; i++) {
+      this._scanOctantThird(octantThirdTransforms[i], radius)
+    }
+  }
+
+  _scanOctantThird (transform, radius) {
+    // TODO: test what node entries size has best performance
     let tree = rbush(9)
+    let size = this.octantThird.length
+    let {x: cx, y: cy, z: cz} = this.bubbleCenter
 
-    this._spiralOutwards(tile => {
-      if (tile.distFromCenter < radius) {
-        this._manageTileFov(tile, tree)
-      } else {
-        return true
+    for (let y = 1; y < size; y++) {
+      if (y > radius) break
+      if (transform.zy !== 0 && y > this.offsetZ) break
+
+      for (let x = 0; x <= y; x++) {
+        for (let z = 0; z <= y; z++) {
+          let bubbleX =
+            cx + x * transform.xx + y * transform.yx + z * transform.zx
+          let bubbleY =
+            cy + y * transform.yy + x * transform.xy + z * transform.zy
+          let bubbleZ =
+            cz + z * transform.zz + x * transform.xz + y * transform.yz
+
+          let bubbleTile = this.bubble[bubbleX][bubbleY][bubbleZ]
+          if (
+            !bubbleTile ||
+            !bubbleTile.worldData ||
+            bubbleTile.distFromCenter > radius
+          ) continue
+
+          let octantTile = this.octantThird[x][y][z]
+          let beyondVis = tree.collides({
+            minX: octantTile.centerPhi, maxX: octantTile.centerPhi,
+            minY: octantTile.centerTheta, maxY: octantTile.centerTheta
+          })
+          if (!beyondVis) bubbleTile.visible = true
+
+          if (beyondVis && bubbleTile.worldData.get('block')) {
+            let bottomFaceBeyondVis = tree.collides({
+              minX: octantTile.centerPhi, maxX: octantTile.centerPhi,
+              minY: octantTile.bottomTheta, maxY: octantTile.bottomTheta
+            })
+            if (!bottomFaceBeyondVis) {
+              bubbleTile.onlyBlockVis = true
+            } else {
+              let leftFaceBeyondVis = tree.collides({
+                minX: octantTile.leftPhi, maxX: octantTile.leftPhi,
+                minY: octantTile.centerTheta, maxY: octantTile.centerTheta
+              })
+              if (!leftFaceBeyondVis) bubbleTile.onlyBlockVis = true
+            }
+          }
+
+          if (bubbleTile.worldData.opaque) {
+            tree.insert({
+              minX: octantTile.leftPhi, maxX: octantTile.rightPhi,
+              minY: octantTile.topTheta, maxY: octantTile.bottomTheta
+            })
+          }
+        }
       }
-    })
-  }
-
-  _manageTileFov (tile, tree) {
-    if (!tile.worldData) return
-
-    let {x, y, z} = tile.posRelToCenter
-    let centerPhi = Math.atan2(x, y)
-    let centerTheta = Math.acos(z / tile.tilesFromCenter)
-    let beyondVis = tree.collides({
-      minX: centerPhi, maxX: centerPhi, minY: centerTheta, maxY: centerTheta
-    })
-    if (!beyondVis) tile.visible = true
-    if (!tile.worldData.opaque) return
-
-    let PI = Math.PI
-    let EPS = Number.EPSILON
-    let halfSpotAngle = Math.atan(1 / (2 * tile.tilesFromCenter))
-    let minX, maxX, minY, maxY
-
-    if (Math.abs(Math.abs(centerPhi) - PI) < EPS) {
-      minX = -PI
-      maxX = -PI + halfSpotAngle
-      minY = centerTheta - halfSpotAngle
-      maxY = centerTheta + halfSpotAngle
-      tree.insert({ minX, maxX, minY, maxY })
-      minX = PI - halfSpotAngle
-      maxX = PI
-    } else if (centerTheta < EPS || Math.abs(centerTheta - PI) < EPS) {
-      minX = -PI
-      maxX = PI
-      if (centerTheta < EPS) {
-        minY = 0
-        maxY = halfSpotAngle
-      } else {
-        minY = PI - halfSpotAngle
-        maxY = PI
-      }
-    } else {
-      minX = centerPhi - halfSpotAngle
-      maxX = centerPhi + halfSpotAngle
-      minY = centerTheta - halfSpotAngle
-      maxY = centerTheta + halfSpotAngle
-    }
-    tree.insert({ minX, maxX, minY, maxY })
-  }
-
-  _spiralOutwards (callback) {
-    let {x, y, z} = this.bubbleCenter
-    let tile
-
-    const zUpAndDown = () => {
-      do {
-        tile = this.bubble[x][y][++z]
-      } while (tile && !callback(tile))
-      z = this.bubbleCenter.z
-      do {
-        tile = this.bubble[x][y][--z]
-      } while (tile && !callback(tile))
-    }
-
-    const yUpAndDown = () => {
-      do {
-        zUpAndDown()
-        z = this.bubbleCenter.z
-        tile = this.bubble[x][++y][z]
-      } while (!callback(tile))
-
-      y = this.bubbleCenter.y - 1
-      tile = this.bubble[x][y][z]
-
-      while (!callback(tile)) {
-        zUpAndDown()
-        z = this.bubbleCenter.z
-        tile = this.bubble[x][--y][z]
-      }
-    }
-
-    do {
-      yUpAndDown()
-      y = this.bubbleCenter.y
-      tile = this.bubble[++x][y][z]
-    } while (!callback(tile))
-
-    x = this.bubbleCenter.x - 1
-    tile = this.bubble[x][y][z]
-
-    while (!callback(tile)) {
-      yUpAndDown()
-      y = this.bubbleCenter.y
-      tile = this.bubble[--x][y][z]
     }
   }
 
@@ -221,10 +242,18 @@ export default class RealityBubble {
       this.widthHeight, this.widthHeight, this.depth
     )
     this._iterateBubble(tile => {
-      if (!tile.visible && !tile.onlyBlockVisible) return
+      if (!tile.visible && !tile.onlyBlockVis) return
       let {x, y, z} = tile.pos
-      clientData[x][y][z] = tile.worldData.exposeToClient(tile.onlyBlockVisible)
+      clientData[x][y][z] = tile.worldData.exposeToClient(tile.onlyBlockVis)
     })
     return clientData
   }
+}
+
+function getPhi (x, y) {
+  return Math.atan2(x, y)
+}
+
+function getTheta (z, dist) {
+  return Math.acos(z / dist)
 }
